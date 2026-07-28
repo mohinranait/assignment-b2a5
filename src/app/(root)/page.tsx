@@ -4,85 +4,11 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Search, Star, MapPin,  ShoppingCart, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import Categories from "./_components/Categories"
+import Gears from "./_components/Gears"
 
 export default function HomePage() {
-  const featuredGear = [
-    {
-      id: 1,
-      name: "Canon EOS R5 Camera",
-      category: "Photography",
-      price: 85,
-      rating: 4.8,
-      reviews: 156,
-      image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=300&fit=crop",
-      provider: "ProGear Rentals",
-      availability: "Available",
-    },
-    {
-      id: 2,
-      name: "DJI Air 3S Drone",
-      category: "Drones",
-      price: 65,
-      rating: 4.9,
-      reviews: 203,
-      image: "https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=400&h=300&fit=crop",
-      provider: "SkyTech Equipment",
-      availability: "Available",
-    },
-    {
-      id: 3,
-      name: "Sony A7IV Mirrorless",
-      category: "Photography",
-      price: 75,
-      rating: 4.7,
-      reviews: 89,
-      image: "https://images.unsplash.com/photo-1606986628024-a4f65e3a7eca?w=400&h=300&fit=crop",
-      provider: "ProGear Rentals",
-      availability: "Available",
-    },
-    {
-      id: 4,
-      name: "Rode Wireless Mic",
-      category: "Audio",
-      price: 35,
-      rating: 4.6,
-      reviews: 124,
-      image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400&h=300&fit=crop",
-      provider: "AudioPro Solutions",
-      availability: "Available",
-    },
-    {
-      id: 5,
-      name: "GoPro Hero 12",
-      category: "Action Camera",
-      price: 45,
-      rating: 4.8,
-      reviews: 312,
-      image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop",
-      provider: "Adventure Gear",
-      availability: "Available",
-    },
-    {
-      id: 6,
-      name: "Manfrotto Tripod Pro",
-      category: "Accessories",
-      price: 25,
-      rating: 4.5,
-      reviews: 98,
-      image: "https://images.unsplash.com/photo-1606986628011-d0a32c1c4ffb?w=400&h=300&fit=crop",
-      provider: "ProGear Rentals",
-      availability: "Available",
-    },
-  ]
 
-  const categories = [
-    { name: "Photography", count: 24 },
-    { name: "Video", count: 18 },
-    { name: "Audio", count: 12 },
-    { name: "Drones", count: 8 },
-    { name: "Camping", count: 16 },
-    { name: "Sports", count: 14 },
-  ]
 
   return (
     <>
@@ -132,7 +58,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works */}
+
+
+      {/* Categories */}
+            <Categories />
+
+      {/* Featured Gear */}
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold">Featured Gear</h2>
+              <p className="mt-2 text-muted-foreground">Handpicked equipment for your next project</p>
+            </div>
+            <Link href="/gear">
+              <Button variant="outline" gap-2>
+                View All <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+         <Gears />
+        </div>
+      </section>
+
+
+
+            {/* How It Works */}
       <section className="border-b border-border py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-3xl font-bold">How It Works</h2>
@@ -166,107 +118,6 @@ export default function HomePage() {
                 <h3 className="font-semibold">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="border-b border-border py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold">Browse by Category</h2>
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                className="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-primary/50 hover:bg-primary/5"
-              >
-                <div className="text-left">
-                  <p className="font-semibold group-hover:text-primary">{category.name}</p>
-                  <p className="text-xs text-muted-foreground">{category.count} items</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Gear */}
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold">Featured Gear</h2>
-              <p className="mt-2 text-muted-foreground">Handpicked equipment for your next project</p>
-            </div>
-            <Link href="/gear">
-              <Button variant="outline" gap-2>
-                View All <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredGear.map((item) => (
-              <Link key={item.id} href={`/gear/${item.id}`}>
-                <Card className="group overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10">
-                  {/* Image */}
-                  <div className="relative h-48 w-full overflow-hidden bg-muted">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute right-3 top-3 rounded-full bg-background/80 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
-                      ${item.price}/day
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-primary">{item.category}</p>
-                        <h3 className="mt-1 font-semibold leading-tight line-clamp-2">{item.name}</h3>
-                      </div>
-                    </div>
-
-                    {/* Rating */}
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3.5 w-3.5 ${
-                              i < Math.floor(item.rating)
-                                ? "fill-amber-400 text-amber-400"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs font-medium">{item.rating}</span>
-                      <span className="text-xs text-muted-foreground">({item.reviews})</span>
-                    </div>
-
-                    {/* Provider */}
-                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {item.provider}
-                    </div>
-
-                    {/* Availability */}
-                    <div className="mt-4 flex items-center gap-2">
-                      <div className="flex-1 rounded bg-primary/10 py-2 px-3 text-center text-xs font-medium text-primary">
-                        {item.availability}
-                      </div>
-                      <button className="rounded bg-primary p-2 text-primary-foreground transition-transform hover:scale-110">
-                        <ShoppingCart className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
             ))}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Star, Search, Filter, X, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import GearCard from '@/components/shared/GearCard'
 
 const gearData = [
   {
@@ -199,9 +200,8 @@ export default function GearListingPage() {
         <div className="flex flex-col gap-6 lg:flex-row">
           {/* Sidebar Filters */}
           <div
-            className={`${
-              showFilters ? 'block' : 'hidden'
-            } w-full space-y-6 lg:sticky lg:top-20 lg:block lg:h-fit lg:w-64 lg:flex-shrink-0`}
+            className={`${showFilters ? 'block' : 'hidden'
+              } w-full space-y-6 lg:sticky lg:top-20 lg:block lg:h-fit lg:w-64 lg:flex-shrink-0`}
           >
             <div className="rounded-lg border border-border bg-card p-6">
               <div className="flex items-center justify-between mb-4">
@@ -374,69 +374,9 @@ export default function GearListingPage() {
             {/* Gear Grid */}
             {filteredGear.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredGear.map((gear) => (
-                  <Link key={gear.id} href={`/gear/${gear.id}`}>
-                    <Card className="group overflow-hidden transition-all hover:shadow-lg hover:shadow-primary/10 h-full flex flex-col">
-                      {/* Image */}
-                      <div className="relative h-48 w-full overflow-hidden bg-muted">
-                        <img
-                          src={gear.image}
-                          alt={gear.name}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        {!gear.availability && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="font-semibold text-white">Out of Stock</span>
-                          </div>
-                        )}
-                        <div className="absolute right-3 top-3 rounded-full bg-background/80 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
-                          ${gear.price}/day
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4 flex-1 flex flex-col">
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-primary">{gear.category}</p>
-                          <h3 className="mt-1 font-semibold line-clamp-2 leading-tight">{gear.name}</h3>
-                        </div>
-
-                        {/* Rating */}
-                        <div className="mt-3 flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3.5 w-3.5 ${
-                                  i < Math.floor(gear.rating)
-                                    ? 'fill-amber-400 text-amber-400'
-                                    : 'text-muted-foreground'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs font-medium">{gear.rating}</span>
-                          <span className="text-xs text-muted-foreground">({gear.reviews})</span>
-                        </div>
-
-                        {/* Provider */}
-                        <p className="mt-2 text-xs text-muted-foreground truncate">
-                          by {gear.provider}
-                        </p>
-
-                        {/* Stock */}
-                        <div className="mt-3 flex items-center justify-between pt-3 border-t border-border">
-                          <span className="text-xs text-muted-foreground">
-                            {gear.inStock} in stock
-                          </span>
-                          <Button size="sm" variant="ghost" disabled={!gear.availability}>
-                            View
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                ))}
+                {/* {filteredGear.map((gear) => (
+                  <GearCard gear={gear} key={gear.id} />
+                ))} */}
               </div>
             ) : (
               <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">

@@ -1,0 +1,26 @@
+import GearCard from '@/components/shared/GearCard';
+import { Card } from '@/components/ui/card';
+import { apiUrl } from '@/config/accessEnv';
+import { IGear } from '@/types/gear.type';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react'
+
+const Gears = async () => {
+
+  const res = await fetch(`${apiUrl}/gear`);
+  const data = await res.json();
+
+  const gears: IGear[] = data.data.gears || [];
+
+
+  return (
+    <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {gears.map((item) => (
+        <GearCard gear={item} key={item.id} />
+      ))}
+    </div>
+  )
+}
+
+export default Gears
