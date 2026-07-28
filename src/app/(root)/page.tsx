@@ -96,12 +96,12 @@ export default function HomePage() {
               <span className="text-xl font-bold">GearRent</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button variant="ghost" size="sm">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/auth/register">
+              <Link href="/register">
                 <Button size="sm">Get Started</Button>
               </Link>
             </div>
@@ -301,7 +301,7 @@ export default function HomePage() {
               Earn money by sharing your equipment with creators and adventurers in your community.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Link href="/auth/register?role=provider">
+              <Link href="/register">
                 <Button
                   size="lg"
                   variant="secondary"
