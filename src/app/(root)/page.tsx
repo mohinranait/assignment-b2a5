@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Search, Star, MapPin, Calendar, ShoppingCart, ArrowRight } from "lucide-react"
+import { Search, Star, MapPin,  ShoppingCart, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -84,33 +85,12 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <span className="font-bold">GR</span>
-              </div>
-              <span className="text-xl font-bold">GearRent</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button size="sm">Get Started</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+  
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background py-20">
+      <section className="relative overflow-hidden bg-linear-to-b from-primary/10 via-primary/5 to-background py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
@@ -315,47 +295,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-            {[
-              {
-                title: "Product",
-                links: ["Browse Gear", "How It Works", "Pricing", "Become a Provider"],
-              },
-              {
-                title: "Company",
-                links: ["About", "Blog", "Careers", "Contact"],
-              },
-              {
-                title: "Support",
-                links: ["Help Center", "Safety", "Terms", "Privacy"],
-              },
-              {
-                title: "Follow",
-                links: ["Twitter", "Instagram", "Facebook", "LinkedIn"],
-              },
-            ].map((column) => (
-              <div key={column.title}>
-                <h3 className="font-semibold">{column.title}</h3>
-                <ul className="mt-4 space-y-2">
-                  {column.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2026 GearRent. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+     
+    </>
   )
 }
