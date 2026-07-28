@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,55 +22,51 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { loginSchema, loginAction, type LoginInput } from '@/actions/auth'
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { login, error: authError } = useAuth();
-  
-  const [email, setEmail] = useState('admin@gmail.com');
-  const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'admin@gmail.com',
+      password: '123456',
+    },
+  });
 
-    // Basic validation
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    setIsLoading(true);
-
+  const onSubmit = async (data: LoginInput) => {
+    setServerError(null);
     try {
-      const success = await login({ email, password });
-      if (success) {
+      const result = await loginAction(data);
+      
+      if (result.success) {
+        // Store auth data in localStorage
+        if (result.data?.token) {
+          localStorage.setItem('authToken', result.data.token);
+        }
+        if (result.data?.user) {
+          localStorage.setItem('user', JSON.stringify(result.data.user));
+        }
+        
+        reset();
         router.push('/dashboard');
       } else {
-        setError(authError || 'Login failed. Please try again.');
+        setServerError(result.error);
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
-      console.error('[v0] Login error:', err);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      setServerError('An unexpected error occurred');
+      console.error('[v0] Login error:', error);
     }
   };
 
@@ -82,12 +80,12 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               {/* Error Message */}
-              {error && (
+              {serverError && (
                 <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 mb-4">
-                  {error}
+                  {serverError}
                 </div>
               )}
 
@@ -98,11 +96,13 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="admin@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  required
+                  {...register('email')}
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && (
+                  <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                )}
               </Field>
 
               {/* Password Field */}
@@ -115,15 +115,14 @@ export function LoginForm({
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    required
+                    {...register('password')}
+                    disabled={isSubmitting}
+                    aria-invalid={!!errors.password}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   >
                     {showPassword ? (
@@ -133,12 +132,15 @@ export function LoginForm({
                     )}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive mt-1">{errors.password.message}</p>
+                )}
               </Field>
 
-              {/* Action Buttons */}
+              {/* Submit Button */}
               <Field>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Signing in...
@@ -149,7 +151,7 @@ export function LoginForm({
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{' '}
-                  <Link href="/auth/register" className="font-medium text-primary hover:underline">
+                  <Link href="/register" className="font-medium text-primary hover:underline">
                     Sign up here
                   </Link>
                 </FieldDescription>

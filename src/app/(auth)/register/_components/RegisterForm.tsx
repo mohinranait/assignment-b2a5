@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,66 +22,60 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { registerSchema, registerAction, type RegisterInput } from '@/actions/auth'
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { register, error: authError } = useAuth();
-  
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'customer' | 'provider'>('customer');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      role: 'customer',
+    },
+  });
 
-    // Basic validation
-    if (!name || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    setIsLoading(true);
-
+  const onSubmit = async (data: RegisterInput) => {
+    setServerError(null);
     try {
-      const success = await register({ name, email, password, role });
-      if (success) {
+      const result = await registerAction(data);
+      
+      if (result.success) {
+        // Store auth data in localStorage
+        if (result.data?.token) {
+          localStorage.setItem('authToken', result.data.token);
+        }
+        if (result.data?.user) {
+          localStorage.setItem('user', JSON.stringify(result.data.user));
+        }
+        
+        reset();
         router.push('/dashboard');
       } else {
-        setError(authError || 'Registration failed. Please try again.');
+        setServerError(result.error);
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
-      console.error('[v0] Register error:', err);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      setServerError('An unexpected error occurred');
+      console.error('[v0] Register error:', error);
     }
   };
+
+  const roleValue = watch('role');
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -91,12 +87,12 @@ export function RegisterForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               {/* Error Message */}
-              {error && (
+              {serverError && (
                 <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 mb-4">
-                  {error}
+                  {serverError}
                 </div>
               )}
 
@@ -107,11 +103,13 @@ export function RegisterForm({
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={isLoading}
-                  required
+                  {...register('name')}
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors.name}
                 />
+                {errors.name && (
+                  <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
+                )}
               </Field>
 
               {/* Email Field */}
@@ -121,11 +119,13 @@ export function RegisterForm({
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  required
+                  {...register('email')}
+                  disabled={isSubmitting}
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && (
+                  <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                )}
               </Field>
 
               {/* Password Field */}
@@ -136,15 +136,14 @@ export function RegisterForm({
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="At least 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    required
+                    {...register('password')}
+                    disabled={isSubmitting}
+                    aria-invalid={!!errors.password}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   >
                     {showPassword ? (
@@ -154,6 +153,9 @@ export function RegisterForm({
                     )}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive mt-1">{errors.password.message}</p>
+                )}
               </Field>
 
               {/* Confirm Password Field */}
@@ -164,15 +166,14 @@ export function RegisterForm({
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isLoading}
-                    required
+                    {...register('confirmPassword')}
+                    disabled={isSubmitting}
+                    aria-invalid={!!errors.confirmPassword}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50"
                   >
                     {showConfirmPassword ? (
@@ -182,6 +183,9 @@ export function RegisterForm({
                     )}
                   </button>
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-destructive mt-1">{errors.confirmPassword.message}</p>
+                )}
               </Field>
 
               {/* Role Selection */}
@@ -191,11 +195,9 @@ export function RegisterForm({
                   <label className="flex items-center gap-2 cursor-pointer flex-1">
                     <input
                       type="radio"
-                      name="role"
                       value="customer"
-                      checked={role === 'customer'}
-                      onChange={() => setRole('customer')}
-                      disabled={isLoading}
+                      {...register('role')}
+                      disabled={isSubmitting}
                       className="h-4 w-4"
                     />
                     <span className="text-sm">Customer</span>
@@ -203,11 +205,9 @@ export function RegisterForm({
                   <label className="flex items-center gap-2 cursor-pointer flex-1">
                     <input
                       type="radio"
-                      name="role"
                       value="provider"
-                      checked={role === 'provider'}
-                      onChange={() => setRole('provider')}
-                      disabled={isLoading}
+                      {...register('role')}
+                      disabled={isSubmitting}
                       className="h-4 w-4"
                     />
                     <span className="text-sm">Provider</span>
@@ -217,8 +217,8 @@ export function RegisterForm({
 
               {/* Submit Button */}
               <Field>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creating account...
@@ -229,7 +229,7 @@ export function RegisterForm({
                 </Button>
                 <FieldDescription className="text-center">
                   Already have an account?{' '}
-                  <Link href="/auth/login" className="font-medium text-primary hover:underline">
+                  <Link href="/login" className="font-medium text-primary hover:underline">
                     Sign in here
                   </Link>
                 </FieldDescription>

@@ -13,6 +13,10 @@ function ThemeProvider({
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
+      storageKey="theme"
+      forcedTheme={undefined}
+      enableColorScheme
+      disableTransitionOnChange
       {...props}
     >
       <ThemeHotkey />
