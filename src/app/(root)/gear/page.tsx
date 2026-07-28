@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Star, Search, Filter, X, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import GearCard from '@/components/shared/GearCard'
+import Gears from '../_components/Gears'
 
 const gearData = [
   {
@@ -371,12 +372,14 @@ export default function GearListingPage() {
               </div>
             )}
 
+            <Gears className={''} />
+
             {/* Gear Grid */}
-            {filteredGear.length > 0 ? (
+            {/* {filteredGear.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {/* {filteredGear.map((gear) => (
+                {filteredGear.map((gear) => (
                   <GearCard gear={gear} key={gear.id} />
-                ))} */}
+                ))}
               </div>
             ) : (
               <div className="rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
@@ -389,7 +392,7 @@ export default function GearListingPage() {
                   Clear all filters
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
