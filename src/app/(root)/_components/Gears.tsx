@@ -1,11 +1,7 @@
 import GearCard from '@/components/shared/GearCard';
-import { Card } from '@/components/ui/card';
 import { apiUrl } from '@/config/accessEnv';
 import { cn } from '@/lib/utils';
 import { IGear } from '@/types/gear.type';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react'
 
 
 type Props= {
