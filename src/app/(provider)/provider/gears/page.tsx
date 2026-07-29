@@ -49,6 +49,25 @@ export default function GearManagementPage() {
     fetchData()
   }, [fetchData])
 
+
+
+  const handleDelete = async (id: string) => {
+    try {
+
+      const res = await fetch(`${apiUrl}/provider/gear/${id}`, {
+        method: "DELETE",
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (data.success) {
+        fetchData()
+      }
+
+    } catch (error) {
+      handleErrors(error as ErrorResponse)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 space-y-8 w-full max-w-7xl mx-auto">
 
@@ -181,7 +200,7 @@ export default function GearManagementPage() {
                       <Edit2 />
                     </Button>
 
-                    <Button type="button" variant={'destructive'} size={'icon'}>
+                    <Button onClick={() => handleDelete(gear?.id)} type="button" variant={'destructive'} size={'icon'}>
                       <Trash2 />
                     </Button>
 
