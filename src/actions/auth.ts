@@ -1,6 +1,8 @@
 'use server';
 
 import { TLoginInput, TRegisterInput } from "@/lib/validations/auth";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 
 
@@ -8,8 +10,6 @@ import { TLoginInput, TRegisterInput } from "@/lib/validations/auth";
 export async function loginAction(data: TLoginInput) {
   try {
     // Validate input
-
-
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,13 +34,24 @@ export async function loginAction(data: TLoginInput) {
     }
 
     const result = await response.json();
+
+    console.log({result});
+    if(result.success){
+      const cookiesStore = await cookies();
+      cookiesStore.set('accessToken', result.data.accessToken , {
+           httpOnly : true,
+            maxAge : 60 * 60 * 24,
+            sameSite : "lax",
+      })
+
+      //  redirect("/dashboard")
+    }
+
+
+    return result
     
     
-    // Return success with auth data
-    return {
-      success: true,
-      data: result,
-    };
+   
   } catch (error) {
    
 

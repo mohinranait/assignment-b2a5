@@ -24,13 +24,14 @@ import { loginSchema, TLoginInput } from "@/lib/validations/auth"
 import { loginAction } from "@/actions/auth"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import handleErrors, { ErrorResponse } from "@/lib/error-handler"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
 
-   const router = useRouter();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -51,7 +52,9 @@ export function LoginForm({
     setServerError(null);
     try {
       const result = await loginAction(data);
+      console.log({result});
       
+
       if (result.success) {
         // Store auth data in localStorage
         if (result.data?.token) {
@@ -61,15 +64,13 @@ export function LoginForm({
           localStorage.setItem('user', JSON.stringify(result.data.user));
         }
 
-   
-        
-        // reset();
-        // router.push('/dashboard');
+        reset();
+        router.push('/dashboard');
       } else {
         setServerError("error");
       }
     } catch (error) {
-   
+      handleErrors(error as ErrorResponse)
       console.error(' Login error:', error);
     }
   };
@@ -82,10 +83,10 @@ export function LoginForm({
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
-          
+
         </CardHeader>
         <CardContent>
-           <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               {/* Error Message */}
               {serverError && (
