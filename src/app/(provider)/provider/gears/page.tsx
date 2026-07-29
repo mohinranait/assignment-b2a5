@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +18,15 @@ import { IGear } from "@/types/gear.type";
 
 export default function GearManagementPage() {
   const [gears, setGears] = useState<IGear[]>([]);
+  const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isSelected, setIsSelected] = useState<IGear | null>(null)
 
-  async function fetchData() {
+
+
+
+  const fetchData = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (searchQuery) params.append('searchTerm', searchQuery)
@@ -37,12 +41,13 @@ export default function GearManagementPage() {
     } catch (error) {
       handleErrors(error as ErrorResponse)
     }
-  }
+  }, [searchQuery])
 
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData()
-  }, [searchQuery])
+  }, [fetchData])
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 space-y-8 w-full max-w-7xl mx-auto">
@@ -58,7 +63,7 @@ export default function GearManagementPage() {
           </p>
         </div>
         <div>
-          <FormModal setIsSelected={setIsSelected} isSelected={isSelected} />
+          <FormModal setIsSelected={setIsSelected} isSelected={isSelected} fetchData={fetchData} setIsOpen={setIsOpen} isOpen={isOpen} />
         </div>
       </div>
 
@@ -169,7 +174,10 @@ export default function GearManagementPage() {
                   </TableCell>
 
                   <TableCell className="text-right space-x-2">
-                    <Button type="button" size={'icon'} onClick={() => setIsSelected(gear)}>
+                    <Button type="button" size={'icon'} onClick={() => {
+                      setIsSelected(gear);
+                      setIsOpen(true)
+                    }}>
                       <Edit2 />
                     </Button>
 

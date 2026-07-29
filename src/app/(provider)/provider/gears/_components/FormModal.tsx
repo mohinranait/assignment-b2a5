@@ -18,14 +18,16 @@ import { useForm } from 'react-hook-form';
 type Props = {
   setIsSelected?: React.Dispatch<React.SetStateAction<IGear | null>>;
   isSelected?: IGear | null;
-  fetchData: () => Promise<void>
+  fetchData: () => Promise<void>;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+  isOpen: boolean;
 }
-const FormModal = ({ isSelected, setIsSelected,fetchData }: Props) => {
+const FormModal = ({ isSelected, setIsSelected, fetchData, isOpen, setIsOpen }: Props) => {
 
   const isEdit = !!isSelected;
 
-  console.log({isSelected});
-  
+  console.log({ isSelected });
+
 
 
 
@@ -71,7 +73,6 @@ const FormModal = ({ isSelected, setIsSelected,fetchData }: Props) => {
   async function onSubmit(values: TGearFormInput) {
     setIsSubmitting(true);
     try {
-      // এখানে ডাটাবেজে পাঠানোর আগে ইমেজ আপলোড লজিক হবে
 
       const payload = {
         title: values.title,
@@ -87,24 +88,44 @@ const FormModal = ({ isSelected, setIsSelected,fetchData }: Props) => {
       console.log({ payload });
 
 
+      if (isEdit) {
+        const res = await fetch(`${apiUrl}/provider/gear/${isSelected?.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-type": "Application/json",
 
-      const res = await fetch(`${apiUrl}/provider/gear`, {
-        method: "POST",
-        headers: {
-          "Content-type": "Application/json",
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        })
+        const data = await res.json()
 
-        },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      })
-      const data = await res.json()
+        if (data.success) {
+          fetchData()
+          if (setIsSelected) setIsSelected(null)
+          setIsOpen(false)
+        }
+      } else {
+        const res = await fetch(`${apiUrl}/provider/gear`, {
+          method: "POST",
+          headers: {
+            "Content-type": "Application/json",
 
-      if(data.success){
-        fetchData()
-        setIsSelected && setIsSelected(null)
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        })
+        const data = await res.json()
+
+        if (data.success) {
+          fetchData()
+          if (setIsSelected) setIsSelected(null)
+          setIsOpen(false)
+        }
       }
 
-      console.log("Final Prisma Payload:", data);
+
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -114,10 +135,10 @@ const FormModal = ({ isSelected, setIsSelected,fetchData }: Props) => {
 
 
   useEffect(() => {
-    if(!isSelected)return;
-    if(isEdit){
+    if (!isSelected) return;
+    if (isEdit) {
       reset({
-        brand : isSelected?.brand || '',
+        brand: isSelected?.brand || '',
         categoryId: isSelected?.category?.id,
         title: isSelected?.title,
         pricePerDay: isSelected?.pricePerDay,
@@ -125,22 +146,22 @@ const FormModal = ({ isSelected, setIsSelected,fetchData }: Props) => {
         feature: isSelected?.feature,
         status: isSelected?.status,
         images: isSelected?.images || [],
-        stock : isSelected?.stock,
+        stock: isSelected?.stock,
       })
     }
-  },[isSelected])
+  }, [isSelected, isEdit, reset])
 
   return (
-    <Dialog open={!!isSelected} onOpenChange={() => setIsSelected && setIsSelected(null) } >
+    <Dialog open={isOpen} onOpenChange={() => setIsOpen(false)} >
       <DialogTrigger>
-        <Button className="w-full sm:w-auto shadow-md font-medium flex items-center gap-2 bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-200">
+        <Button type='button' onClick={() => setIsOpen(true)} className="w-full sm:w-auto shadow-md font-medium flex items-center gap-2 bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-200">
           <Plus className="h-4 w-4 stroke-3" /> Add New Gear
         </Button>
       </DialogTrigger>
       <DialogContent className={'min-w-200'}>
         <DialogHeader>
           <DialogTitle>
-            <h2 className="text-2xl font-bold"> {isEdit ? "Update Gear":"Add new Gear"} </h2>
+            <h2 className="text-2xl font-bold"> {isEdit ? "Update Gear" : "Add new Gear"} </h2>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription>
