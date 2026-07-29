@@ -1,120 +1,57 @@
 'use server';
-
-import { TLoginInput, TRegisterInput } from "@/lib/validations/auth";
+import { TLoginInput } from "@/lib/validations/auth";
 import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken"
 import { redirect } from "next/navigation";
-
-
 
 // Login action
 export async function loginAction(data: TLoginInput) {
-  try {
-    // Validate input
+  let redirectUrl: string | null = null;
+  let result: any = null;
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    console.log({apiUrl});
-    
-    if (!apiUrl) {
-      throw new Error('API URL is not configured');
-    }
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error('API URL is not configured');
+  }
 
-    // Call backend API
-    const response = await fetch(`${apiUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+  const response = await fetch(`${apiUrl}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Login failed');
+  }
+
+  result = await response.json();
+
+  if (result.success) {
+    const cookiesStore = await cookies();
+    cookiesStore.set('accessToken', result.data.accessToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24,
+      sameSite: "lax",
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Login failed');
+    const decodedToken = jwt.decode(result.data.accessToken) as JwtPayload;
+
+    if (decodedToken.role === "Customer") {
+      redirectUrl = "/dashboard";
+    } else if (decodedToken.role === "Admin") {
+      redirectUrl = "/admin";
+    } else if (decodedToken.role === "Provider") {
+      redirectUrl = "/provider";
     }
-
-    const result = await response.json();
-
-    console.log({result});
-    if(result.success){
-      const cookiesStore = await cookies();
-      cookiesStore.set('accessToken', result.data.accessToken , {
-           httpOnly : true,
-            maxAge : 60 * 60 * 24,
-            sameSite : "lax",
-      })
-
-      //  redirect("/dashboard")
-    }
-
-
-    return result
-    
-    
-   
-  } catch (error) {
-   
-
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    return {
-      success: false,
-      error: 'An unexpected error occurred',
-    };
   }
-}
 
-// Register action
-export async function registerAction(data: TRegisterInput) {
-  try {
-   
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error('API URL is not configured');
-    }
 
-    // Prepare payload for API (exclude confirmPassword)
-    const { confirmPassword, ...payload } = data;
-
-    // Call backend API
-    const response = await fetch(`${apiUrl}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Registration failed');
-    }
-
-    const result = await response.json();
-    
-    return {
-      success: true,
-      data: result,
-    };
-  } catch (error) {
-   
-
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-
-    return {
-      success: false,
-      error: 'An unexpected error occurred',
-    };
+  if (redirectUrl) {
+    redirect(redirectUrl);
   }
+
+  return result;
 }

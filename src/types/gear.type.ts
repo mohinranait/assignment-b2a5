@@ -12,6 +12,7 @@ export interface IGear {
   stock: number;
   images: string[];
   status: boolean;
+  feature: boolean;
   createdAt: Date;            // Prisma DateTime maps to JavaScript/TypeScript Date
   updatedAt: Date;
   

@@ -23,7 +23,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, TLoginInput } from "@/lib/validations/auth"
 import { loginAction } from "@/actions/auth"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import handleErrors, { ErrorResponse } from "@/lib/error-handler"
 
 export function LoginForm({
@@ -31,15 +30,14 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
 
-  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm<TLoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -49,30 +47,10 @@ export function LoginForm({
   });
 
   const onSubmit = async (data: TLoginInput) => {
-    setServerError(null);
-    try {
-      const result = await loginAction(data);
-      console.log({result});
-      
-
-      if (result.success) {
-        // Store auth data in localStorage
-        if (result.data?.token) {
-          localStorage.setItem('authToken', result.data.token);
-        }
-        if (result.data?.user) {
-          localStorage.setItem('user', JSON.stringify(result.data.user));
-        }
-
-        reset();
-        router.push('/dashboard');
-      } else {
-        setServerError("error");
-      }
-    } catch (error) {
-      handleErrors(error as ErrorResponse)
-      console.error(' Login error:', error);
-    }
+   
+  
+      await loginAction(data);    
+   
   };
 
   return (
@@ -88,12 +66,7 @@ export function LoginForm({
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
-              {/* Error Message */}
-              {serverError && (
-                <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20 mb-4">
-                  {serverError}
-                </div>
-              )}
+             
 
               {/* Email Field */}
               <Field>

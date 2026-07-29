@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 const projects = [
   {
     name: "Gears",
-    url: '/gears',
+    url: '/provider/gears',
     icon: LayoutDashboard
   },
   {
